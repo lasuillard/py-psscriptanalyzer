@@ -344,6 +344,26 @@ def test_main_with_real_files(
         assert ret == 0
 
 
+def test_text_output_preserves_non_ascii_script_name(tmp_path: Path, capfd: pytest.CaptureFixture[str]) -> None:
+    script = tmp_path / "한글.ps1"
+    script.write_text("Write-Host 'hello'\n", encoding="utf-8-sig")
+
+    cli.main(["--severity", "All", str(script)])
+    output = capfd.readouterr().out
+
+    assert "한글.ps1" in output
+
+
+def test_text_output_preserves_non_ascii_content(tmp_path: Path, capfd: pytest.CaptureFixture[str]) -> None:
+    script = tmp_path / "script.ps1"
+    script.write_text("$global:한글 = 1\n", encoding="utf-8-sig")
+
+    cli.main(["--severity", "All", str(script)])
+    output = capfd.readouterr().out
+
+    assert "global:한글" in output
+
+
 def test_parser_all_options() -> None:
     """Test all options in the parser."""
     # Test all options in the parser

@@ -9,7 +9,12 @@ from collections.abc import Sequence
 from typing import Any, Optional
 
 from .constants import ANALYSIS_TIMEOUT, POWERSHELL_FILE_EXTENSIONS, SARIF_VERSION, SEVERITY_LEVELS
-from .powershell import check_psscriptanalyzer_installed, find_powershell, install_psscriptanalyzer
+from .powershell import (
+    SET_OUTPUT_ENCODING,
+    check_psscriptanalyzer_installed,
+    find_powershell,
+    install_psscriptanalyzer,
+)
 from .scripts import build_powershell_file_array, generate_analysis_script, generate_format_script
 
 
@@ -52,6 +57,8 @@ def run_script_analyzer(
             json_output=(output_format in ["json", "sarif"]),
         )
 
+    ps_command = f"{SET_OUTPUT_ENCODING}; {ps_command}"
+
     try:
         if format_files:
             # For formatting, just run the command normally
@@ -82,10 +89,13 @@ def run_script_analyzer(
             timeout=ANALYSIS_TIMEOUT,
             check=False,
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
         # Parse PowerShell JSON output or empty list if no results
-        json_data = [] if result.returncode == 0 and not result.stdout.strip() else json.loads(result.stdout)
+        stdout = result.stdout or ""
+        json_data = [] if result.returncode == 0 and not stdout.strip() else json.loads(stdout)
 
         # If SARIF format is requested, convert JSON to SARIF
         output_data = convert_to_sarif(json_data, files) if output_format == "sarif" else json_data

@@ -294,6 +294,8 @@ def test_run_script_analyzer_sarif_output() -> None:
             # Validate results
             assert result == 0
             mock_run.assert_called_once()
+            assert mock_run.call_args.kwargs["encoding"] == "utf-8"
+            assert mock_run.call_args.kwargs["errors"] == "replace"
             mock_convert.assert_called_once()
             mock_open.assert_called_once_with(tmp_file, "w", encoding="utf-8")
 

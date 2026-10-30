@@ -9,7 +9,12 @@ from py_psscriptanalyzer.constants import (
     POWERSHELL_CHECK_TIMEOUT,
     POWERSHELL_EXECUTABLES,
 )
-from py_psscriptanalyzer.powershell import check_psscriptanalyzer_installed, find_powershell, install_psscriptanalyzer
+from py_psscriptanalyzer.powershell import (
+    SET_OUTPUT_ENCODING,
+    check_psscriptanalyzer_installed,
+    find_powershell,
+    install_psscriptanalyzer,
+)
 
 
 class TestFindPowershell:
@@ -35,6 +40,8 @@ class TestFindPowershell:
             text=True,
             timeout=POWERSHELL_CHECK_TIMEOUT,
             check=False,
+            encoding="utf-8",
+            errors="replace",
         )
         assert result == first_executable
 
@@ -117,12 +124,14 @@ class TestCheckPSScriptAnalyzerInstalled:
             [
                 "pwsh",
                 "-Command",
-                "Get-Module -ListAvailable -Name PSScriptAnalyzer",
+                f"{SET_OUTPUT_ENCODING}; Get-Module -ListAvailable -Name PSScriptAnalyzer",
             ],
             capture_output=True,
             text=True,
             timeout=MODULE_CHECK_TIMEOUT,
             check=False,
+            encoding="utf-8",
+            errors="replace",
         )
         assert result is True
 
@@ -187,12 +196,14 @@ class TestInstallPSScriptAnalyzer:
             [
                 "pwsh",
                 "-Command",
-                "Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser",
+                f"{SET_OUTPUT_ENCODING}; Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser",
             ],
             capture_output=True,
             text=True,
             timeout=INSTALL_TIMEOUT,
             check=False,
+            encoding="utf-8",
+            errors="replace",
         )
         assert result is True
         mock_print.assert_called_once_with("PSScriptAnalyzer not found. Installing...")

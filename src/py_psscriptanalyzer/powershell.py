@@ -5,6 +5,9 @@ from typing import Optional
 
 from .constants import INSTALL_TIMEOUT, MODULE_CHECK_TIMEOUT, POWERSHELL_CHECK_TIMEOUT, POWERSHELL_EXECUTABLES
 
+# PowerShell pipes output in the console OEM code page by default, not UTF-8.
+SET_OUTPUT_ENCODING = "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8"
+
 
 def find_powershell() -> Optional[str]:
     """Find PowerShell executable on the system."""
@@ -16,6 +19,8 @@ def find_powershell() -> Optional[str]:
                 text=True,
                 timeout=POWERSHELL_CHECK_TIMEOUT,
                 check=False,
+                encoding="utf-8",
+                errors="replace",
             )
             if result.returncode == 0:
                 return name
@@ -32,14 +37,16 @@ def check_psscriptanalyzer_installed(powershell_cmd: str) -> bool:
             [
                 powershell_cmd,
                 "-Command",
-                "Get-Module -ListAvailable -Name PSScriptAnalyzer",
+                f"{SET_OUTPUT_ENCODING}; Get-Module -ListAvailable -Name PSScriptAnalyzer",
             ],
             capture_output=True,
             text=True,
             timeout=MODULE_CHECK_TIMEOUT,
             check=False,
+            encoding="utf-8",
+            errors="replace",
         )
-        return result.returncode == 0 and "PSScriptAnalyzer" in result.stdout
+        return result.returncode == 0 and "PSScriptAnalyzer" in (result.stdout or "")
     except subprocess.TimeoutExpired:
         return False
 
@@ -52,12 +59,14 @@ def install_psscriptanalyzer(powershell_cmd: str) -> bool:
             [
                 powershell_cmd,
                 "-Command",
-                "Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser",
+                f"{SET_OUTPUT_ENCODING}; Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser",
             ],
             capture_output=True,
             text=True,
             timeout=INSTALL_TIMEOUT,
             check=False,
+            encoding="utf-8",
+            errors="replace",
         )
         return result.returncode == 0
     except subprocess.TimeoutExpired:
