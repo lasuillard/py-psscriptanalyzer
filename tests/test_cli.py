@@ -313,8 +313,6 @@ def test_main_with_real_files(
     """Test with real PowerShell files."""
     # Create a PowerShell file in a temporary directory
     ps1_path = tmp_path / "test.ps1"
-    # Create a PowerShell file in a temporary directory
-    ps1_path = tmp_path / "test.ps1"
     ps1_path.write_text("# Test PowerShell file")
 
     # Mock function calls but use the real find_powershell_files_recursive
