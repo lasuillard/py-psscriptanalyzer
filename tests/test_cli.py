@@ -349,7 +349,7 @@ def test_text_output_preserves_non_ascii_script_name(tmp_path: Path, capfd: pyte
     cli.main(["--severity", "All", str(script)])
     output = capfd.readouterr().out
 
-    assert "한글.ps1" in output
+    assert "File '한글.ps1' uses Write-Host" in output
 
 
 def test_text_output_preserves_non_ascii_content(tmp_path: Path, capfd: pytest.CaptureFixture[str]) -> None:
@@ -359,7 +359,7 @@ def test_text_output_preserves_non_ascii_content(tmp_path: Path, capfd: pytest.C
     cli.main(["--severity", "All", str(script)])
     output = capfd.readouterr().out
 
-    assert "global:한글" in output
+    assert "Found global variable 'global:한글'" in output
 
 
 def test_parser_all_options() -> None:
